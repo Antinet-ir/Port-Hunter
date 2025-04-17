@@ -35,10 +35,11 @@ install_requirements
 
 RATE=50000
 PORTS="1-65535"
-BASE_DIR="masscan_results"
+BASE_DIR="$(pwd)/masscan_results"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 SCAN_DIR="$BASE_DIR/scan_$TIMESTAMP"
 mkdir -p "$SCAN_DIR"
+
 
 INTERFACE=$(ip route | grep default | awk '{print $5}' | head -n 1)
 SOURCE_IP=$(ip -4 addr show "$INTERFACE" | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | head -n 1)

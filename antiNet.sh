@@ -1,9 +1,37 @@
 #!/bin/bash
 
+# Function to check and install required packages
+install_requirements() {
+    echo "[*] Checking for required packages..."
+    for package in masscan nmap; do
+        if ! command -v $package &> /dev/null; then
+            echo "[!] $package is not installed. Installing..."
+            sudo apt-get install -y $package
+            if [ $? -ne 0 ]; then
+                echo "[!] Failed to install $package. Please install it manually."
+                exit 1
+            fi
+        else
+            echo "[+] $package is already installed."
+        fi
+    done
+}
+
+# Check if at least one CIDR is provided
 if [ $# -lt 1 ]; then
-    echo "Usage: $0 cidr1 [cidr2 ...]"
+    echo "Usage: $0 [-f] cidr1 [cidr2 ...]"
     exit 1
 fi
+
+# Check for the -f flag
+FAST_SCAN=false
+if [[ $1 == "-f" ]]; then
+    FAST_SCAN=true
+    shift  # Remove the -f flag from the arguments
+fi
+
+# Install required packages if not installed
+install_requirements
 
 RATE=50000
 PORTS="1-65535"
@@ -50,7 +78,12 @@ for cidr in "$@"; do
 
     while IFS= read -r ip; do
         echo "[*] Running nmap scan on $ip"
-        nmap -Pn -sV -sC -T4 -p- -oN "$CIDR_DIR/nmap_$ip.txt" "$ip"
+        
+        if $FAST_SCAN; then
+            nmap -Pn -F -oN "$CIDR_DIR/nmap_$ip.txt" "$ip"
+        else
+            nmap -Pn -sV -sC -T4 -p- -oN "$CIDR_DIR/nmap_$ip.txt" "$ip"
+        fi
     done < "$LIVE_IPS"
 
     echo "[+] Nmap scans completed for $cidr"

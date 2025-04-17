@@ -50,8 +50,15 @@ jobs:
           %:
           	dh \$@
           EOF
-
           chmod +x debian/rules
+
+          cat <<EOF > debian/changelog
+          antinet (1.0.0) unstable; urgency=medium
+
+            * Initial release.
+
+           -- Hossein Masihi <hossein.masihi@gmail.com>  $(date -R)
+          EOF
 
       - name: Build the .deb package
         run: |

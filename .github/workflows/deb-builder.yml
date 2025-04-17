@@ -18,7 +18,7 @@ jobs:
       - name: Set up dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y devscripts build-essential lintian debhelper
+          sudo apt-get install -y devscripts build-essential lintian debhelper-compat
 
       - name: Create debian folder and control files
         run: |

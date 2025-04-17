@@ -65,16 +65,20 @@ jobs:
           chmod +x antinet.sh
           dpkg-buildpackage -us -uc
 
+      - name: Move .deb to current directory
+        run: |
+          mv ../antinet_*.deb .
+
       - name: Upload .deb as artifact
         uses: actions/upload-artifact@v4
         with:
           name: antinet-deb-package
-          path: ../antinet_*.deb
+          path: antinet_*.deb
 
       - name: Upload .deb to GitHub Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
-          files: ../antinet_*.deb
+          files: antinet_*.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

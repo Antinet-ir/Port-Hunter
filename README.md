@@ -8,7 +8,9 @@ AntiNet is a robust Bash script that simplifies network scanning and reconnaissa
   
 - **Mass Scanning**: Utilizes `masscan` to quickly scan specified CIDR ranges for live hosts.
   
-- **Detailed Scanning**: Executes a full `nmap` scan on each identified live IP address.
+- **Flexible Nmap Scanning**: 
+  - Perform a full `nmap` scan on all ports.
+  - Optionally, run a fast `nmap` scan on the top 100 ports using the `-F` flag.
   
 - **Organized Output**: Saves all scan results in a structured folder hierarchy for easy navigation.
 
@@ -37,14 +39,16 @@ AntiNet is a robust Bash script that simplifies network scanning and reconnaissa
 
 ## Usage
 
-Run the script with the desired CIDR range as an argument:
-```bash
-./antiNet.sh <CIDR>
-```
+Run the script with the desired CIDR range as an argument. You can also use the `-f` flag for a fast scan.
 
-### Example
+### Full Nmap Scan
 ```bash
 ./antiNet.sh 192.168.1.0/24
+```
+
+### Fast Nmap Scan (Top 100 Ports)
+```bash
+./antiNet.sh -f 192.168.1.0/24
 ```
 
 ## Output

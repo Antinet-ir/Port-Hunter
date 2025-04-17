@@ -1,0 +1,73 @@
+name: Build and Release Debian Package
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [created]
+
+jobs:
+  build-deb:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y devscripts build-essential lintian debhelper
+
+      - name: Create debian folder and control files
+        run: |
+          mkdir -p debian
+
+          cat <<EOF > debian/control
+          Source: antinet
+          Section: utils
+          Priority: optional
+          Maintainer: Hossein Masihi <hossein.masihi@gmail.com>
+          Build-Depends: debhelper (>= 11)
+          Standards-Version: 4.1.3
+          Homepage: https://github.com/hosseinMsh/AntiNet
+
+          Package: antinet
+          Architecture: all
+          Depends: bash, nmap
+          Description: AntiNet - Bash script for network scanning and reconnaissance
+           AntiNet is a robust Bash script that simplifies network scanning and reconnaissance.
+           It automatically detects your network settings, performs mass scans on specified
+           CIDR ranges, and conducts detailed Nmap scans on live IPs, organizing results
+           for easy access.
+          EOF
+
+          echo "antinet.sh usr/bin/antinet" > debian/install
+
+          cat <<EOF > debian/rules
+          #!/usr/bin/make -f
+          %:
+          	dh \$@
+          EOF
+
+          chmod +x debian/rules
+
+      - name: Build the .deb package
+        run: |
+          chmod +x antinet.sh
+          dpkg-buildpackage -us -uc
+
+      - name: Upload .deb as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: antinet-deb-package
+          path: ../antinet_*.deb
+
+      - name: Upload .deb to GitHub Release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ../antinet_*.deb
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

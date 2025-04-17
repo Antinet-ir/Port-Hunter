@@ -35,7 +35,7 @@ jobs:
 
           Package: antinet
           Architecture: all
-          Depends: bash, nmap
+          Depends: bash, nmap, masscan 
           Description: AntiNet - Bash script for network scanning and reconnaissance
            AntiNet is a robust Bash script that simplifies network scanning and reconnaissance.
            It automatically detects your network settings, performs mass scans on specified

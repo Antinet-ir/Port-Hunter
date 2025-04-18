@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Terminal, Network, Shield, Eye } from 'lucide-react';
 
 const terminalLines = [
@@ -12,8 +12,7 @@ const terminalLines = [
   '[+] Starting nmap scan for 192.168.1.1',
   '[+] Port 80 (http): Apache httpd 2.4.29',
   '[+] Port 22 (ssh): OpenSSH 7.6p1',
-  '[+] Scan complete! Results saved to antinet_results/scan_20250418_145300/',
-  '[*] Listening for new scans...',
+  '[+] Scan complete! Results saved to antinet_results/scan_20250418_145300/'
 ];
 
 const Hero: React.FC = () => {
@@ -23,26 +22,26 @@ const Hero: React.FC = () => {
   useEffect(() => {
     let index = 0;
     const interval = setInterval(() => {
-      setDisplayedLines((prev) => {
-        const next = [...prev, terminalLines[index % terminalLines.length]];
-        return next.length > 20 ? next.slice(-20) : next;
-      });
+      setDisplayedLines((prev) => [...prev, terminalLines[index]]);
       index++;
-    }, 500); // 🔥 سرعت بیشتر
+      if (terminalRef.current) {
+        terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+      }
+      if (index === terminalLines.length) clearInterval(interval);
+    }, 300);
 
-    return () => clearInterval(interval);
+    const audio = new Audio('/sounds/type.mp3');
+    audio.volume = 0.2;
+    const playSound = () => audio.play().catch(() => {});
+    const soundInterval = setInterval(() => {
+      if (index < terminalLines.length) playSound();
+    }, 100);
+
+    return () => clearInterval(soundInterval);
   }, []);
-
-  // 👇 اسکرول خودکار به آخر ترمینال
-  useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
-    }
-  }, [displayedLines]);
 
   return (
     <section className="pt-32 pb-20 relative overflow-hidden">
-      {/* Background pattern */}
       <div className="absolute inset-0 -z-10 opacity-10">
         <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-br from-blue-600 via-violet-500 to-purple-600 blur-3xl"></div>
       </div>
@@ -63,15 +62,15 @@ const Hero: React.FC = () => {
               A powerful network reconnaissance tool that automates scanning, detection, and information gathering for security professionals.
             </p>
             <div className="flex flex-wrap gap-4">
-              <a 
-                href="#installation" 
+              <a
+                href="#installation"
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
               >
                 Get Started
               </a>
-              <a 
-                href="https://github.com/hosseinMsh/AntiNet" 
-                target="_blank" 
+              <a
+                href="https://github.com/hosseinMsh/AntiNet"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium rounded-lg transition-colors"
               >
@@ -81,21 +80,18 @@ const Hero: React.FC = () => {
           </div>
 
           <div className="md:w-1/2 relative">
-            <div className="w-full h-80 sm:h-96 bg-gray-800 rounded-lg shadow-xl overflow-hidden">
-              <div className="flex items-center bg-gray-900 px-4 py-2">
+            <div className="w-full h-80 sm:h-96 bg-black rounded-lg shadow-xl overflow-hidden border border-green-400">
+              <div className="flex items-center bg-green-950 px-4 py-2">
                 <div className="flex space-x-2">
                   <div className="w-3 h-3 rounded-full bg-red-500"></div>
                   <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
                   <div className="w-3 h-3 rounded-full bg-green-500"></div>
                 </div>
-                <div className="ml-4 text-gray-400 text-sm">Terminal</div>
+                <div className="ml-4 text-green-400 text-sm">root@antinet:~#</div>
               </div>
-              <div
-                className="p-4 font-mono text-sm text-green-400 overflow-y-auto h-full"
-                ref={terminalRef}
-              >
-                {displayedLines.map((line, idx) => (
-                  <p key={idx} className="whitespace-pre-wrap">{line}</p>
+              <div ref={terminalRef} className="p-4 font-mono text-sm text-green-400 overflow-y-auto h-full whitespace-pre-wrap">
+                {displayedLines.map((line, i) => (
+                  <p key={i}>{line}</p>
                 ))}
               </div>
             </div>
@@ -133,3 +129,4 @@ const Hero: React.FC = () => {
 };
 
 export default Hero;
+

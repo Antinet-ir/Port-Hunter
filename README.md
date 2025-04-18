@@ -1,70 +1,152 @@
+Great! Here's your updated `README.md` with the new **CSV/JSON export features**, enhanced formatting, and slight wording improvements for clarity:
+
+---
+
+```markdown
 # AntiNet
 
-AntiNet is a robust Bash script that simplifies network scanning and reconnaissance. It automatically detects your network settings, performs mass scans on specified CIDR ranges, and conducts detailed nmap scans on live IPs, all while organizing the results for easy access.
+**AntiNet** is a robust Bash script that simplifies network scanning and reconnaissance. It automatically detects your network settings, performs mass scans on specified CIDR ranges using `masscan`, and conducts detailed `nmap` scans on live IPs — all while organizing the results for easy access and exporting structured data formats.
 
-## Features
+---
 
-- **Auto-Detection**: Automatically detects your network interface, MAC address, and IP address.
-  
-- **Mass Scanning**: Utilizes `masscan` to quickly scan specified CIDR ranges for live hosts.
-  
-- **Flexible Nmap Scanning**: 
-  - Perform a full `nmap` scan on all ports.
-  - Optionally, run a fast `nmap` scan on the top 100 ports using the `-F` flag.
-  
-- **Organized Output**: Saves all scan results in a structured folder hierarchy for easy navigation.
+## 🚀 Features
 
-## Requirements
+- **Auto-Detection**: Automatically detects your network interface, IP address, gateway, and MAC address.
+- **Mass Scanning**: Uses `masscan` to quickly scan entire CIDR ranges (supports custom rates and port ranges).
+- **Flexible Nmap Scanning**:
+  - Full detailed scan with `-sV -sC -p-`
+  - Optional fast scan using the `-F` flag (top 100 ports)
+- **Structured Output**: Results are saved in a time-stamped directory, organized per CIDR block.
+- **CSV & JSON Exports**: Nmap scan results are automatically parsed and exported into `results.csv` and `results.json`.
 
-- Bash
-- masscan
-- nmap
+---
 
-## Installation
+## 🧰 Requirements
+
+- `bash`
+- `masscan`
+- `nmap`
+- `jq` (for JSON output)
+- `libxml2-utils` (for `xmllint`, used in parsing)
+
+Install dependencies with:
+
+```bash
+sudo apt-get update
+sudo apt-get install -y masscan nmap jq libxml2-utils
+```
+
+---
+
+## 📦 Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/hosseinMsh/AntiNet.git
    ```
 
 2. Navigate to the project directory:
+
    ```bash
    cd AntiNet
    ```
 
 3. Make the script executable:
+
    ```bash
    chmod +x antiNet.sh
    ```
 
-## Usage
+---
 
-Run the script with the desired CIDR range as an argument. You can also use the `-f` flag for a fast scan.
+## 📖 Usage
+
+Run the script with one or more CIDR ranges. Use the optional `-f` flag to enable fast Nmap scanning.
 
 ### Full Nmap Scan
+
 ```bash
 ./antiNet.sh 192.168.1.0/24
 ```
 
 ### Fast Nmap Scan (Top 100 Ports)
+
 ```bash
 ./antiNet.sh -f 192.168.1.0/24
 ```
 
-## Output
+You can specify multiple ranges:
 
-- The results will be stored in a folder named after the CIDR range you scanned, containing:
-  - Live IP addresses
-  - nmap scan results for each IP
+```bash
+./antiNet.sh -f 10.0.0.0/24 192.168.1.0/24
+```
 
-## Disclaimer
+---
 
-**AntiNet** is intended for educational and ethical use only. The author does not accept any responsibility for misuse or illegal activities conducted with this script. By using this tool, you agree to comply with all applicable laws and regulations regarding network scanning and security. Always obtain proper authorization before scanning any network.
+## 📂 Output Structure
 
-## Contributing
+Results are saved under a timestamped directory like `masscan_results/scan_20250418_145300`:
 
-Contributions are welcome! If you have suggestions or improvements, feel free to open an issue or submit a pull request.
+```
+masscan_results/
+└── scan_YYYYMMDD_HHMMSS/
+    └── 192.168.1.0_24/
+        ├── masscan.txt        # Raw Masscan output
+        ├── live_hosts.txt     # List of live IPs
+        ├── nmap_192.168.1.1.txt
+        ├── nmap_192.168.1.1.xml
+        ├── results.csv        # Combined scan summary (CSV)
+        └── results.json       # Combined scan summary (JSON)
+```
 
-## License
+---
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 📊 Sample Output
+
+### CSV
+
+```csv
+IP,Port,Protocol,Service,Product,Version
+192.168.1.1,80,tcp,http,Apache,httpd 2.4.29
+192.168.1.1,22,tcp,ssh,OpenSSH,7.6p1
+```
+
+### JSON
+
+```json
+[
+  {
+    "ip": "192.168.1.1",
+    "port": "80",
+    "protocol": "tcp",
+    "service": "http",
+    "product": "Apache",
+    "version": "httpd 2.4.29"
+  },
+  ...
+]
+```
+
+---
+
+## ⚠️ Disclaimer
+
+**AntiNet** is intended for **educational and ethical use only**. Scanning networks without permission may be illegal. The author assumes no responsibility for misuse. Always obtain explicit authorization before scanning any network.
+
+---
+
+## 🤝 Contributing
+
+Pull requests and suggestions are welcome! If you have ideas or improvements, feel free to open an issue or submit a PR.
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
+```
+
+---
+
+Let me know if you want badge icons, a GIF demo section, or GitHub-friendly formatting with TOC and links!

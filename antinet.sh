@@ -3,7 +3,7 @@
 # Function to check and install required packages
 install_requirements() {
     echo "[*] Checking for required packages..."
-    for package in masscan nmap; do
+    for package in masscan nmap jq; do
         if ! command -v $package &> /dev/null; then
             echo "[!] $package is not installed. Installing..."
             sudo apt-get install -y $package
@@ -35,7 +35,7 @@ install_requirements
 
 RATE=50000
 PORTS="1-65535"
-BASE_DIR="$(pwd)/masscan_results"
+BASE_DIR="$(pwd)/antinet_results"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 SCAN_DIR="$BASE_DIR/scan_$TIMESTAMP"
 mkdir -p "$SCAN_DIR"
@@ -77,16 +77,59 @@ for cidr in "$@"; do
 
     echo "[+] Live hosts saved to $LIVE_IPS"
 
+    CSV_FILE="$CIDR_DIR/results.csv"
+    JSON_FILE="$CIDR_DIR/results.json"
+
+    echo "IP,Port,Protocol,Service,Product,Version" > "$CSV_FILE"
+    echo "[" > "$JSON_FILE"
+
+    FIRST_ENTRY=true
     while IFS= read -r ip; do
         echo "[*] Running nmap scan on $ip"
-        
+
+        NMAP_OUTPUT="$CIDR_DIR/nmap_$ip.txt"
+        NMAP_XML="$CIDR_DIR/nmap_$ip.xml"
+
         if $FAST_SCAN; then
-            nmap -Pn -F -oN "$CIDR_DIR/nmap_$ip.txt" "$ip"
+            nmap -Pn -F -oN "$NMAP_OUTPUT" -oX "$NMAP_XML" "$ip"
         else
-            nmap -Pn -sV -sC -T4 -p- -oN "$CIDR_DIR/nmap_$ip.txt" "$ip"
+            nmap -Pn -sV -sC -T4 -p- -oN "$NMAP_OUTPUT" -oX "$NMAP_XML" "$ip"
         fi
+
+        # Parse XML using xmllint and write to CSV and JSON
+        mapfile -t PORT_LINES < <(xmllint --xpath '//port' "$NMAP_XML" 2>/dev/null)
+
+        for (( i=0; i<${#PORT_LINES[@]}; i++ )); do
+            PORT=$(echo "${PORT_LINES[$i]}" | grep -oP 'portid="\K\d+')
+            PROTO=$(echo "${PORT_LINES[$i]}" | grep -oP 'protocol="\K\w+')
+            SERVICE=$(echo "${PORT_LINES[$i]}" | grep -oP '<service name="\K[^"]+')
+            PRODUCT=$(echo "${PORT_LINES[$i]}" | grep -oP 'product="\K[^"]*')
+            VERSION=$(echo "${PORT_LINES[$i]}" | grep -oP 'version="\K[^"]*')
+
+            echo "$ip,$PORT,$PROTO,$SERVICE,$PRODUCT,$VERSION" >> "$CSV_FILE"
+
+            JSON_ENTRY=$(jq -n \
+                --arg ip "$ip" \
+                --arg port "$PORT" \
+                --arg proto "$PROTO" \
+                --arg service "$SERVICE" \
+                --arg product "$PRODUCT" \
+                --arg version "$VERSION" \
+                '{ip: $ip, port: $port, protocol: $proto, service: $service, product: $product, version: $version}')
+
+            if [ "$FIRST_ENTRY" = true ]; then
+                FIRST_ENTRY=false
+            else
+                echo "," >> "$JSON_FILE"
+            fi
+            echo "$JSON_ENTRY" >> "$JSON_FILE"
+        done
+
     done < "$LIVE_IPS"
 
+    echo "]" >> "$JSON_FILE"
+    echo "[+] CSV saved to $CSV_FILE"
+    echo "[+] JSON saved to $JSON_FILE"
     echo "[+] Nmap scans completed for $cidr"
     echo
 done

@@ -63,7 +63,7 @@ const Hero: React.FC = () => {
                 <p className="mt-2">[+] Starting nmap scan for 192.168.1.1</p>
                 <p>[+] Port 80 (http): Apache httpd 2.4.29</p>
                 <p>[+] Port 22 (ssh): OpenSSH 7.6p1</p>
-                <p className="mt-2">[+] Scan complete! Results saved to masscan_results/scan_20250418_145300/</p>
+                <p className="mt-2">[+] Scan complete! Results saved to antinet_results/scan_20250418_145300/</p>
               </div>
             </div>
           </div>

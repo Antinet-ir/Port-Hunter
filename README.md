@@ -81,10 +81,10 @@ You can specify multiple ranges:
 
 ## 📂 Output Structure
 
-Results are saved under a timestamped directory like `masscan_results/scan_20250418_145300`:
+Results are saved under a timestamped directory like `antinet_results/scan_20250418_145300`:
 
 ```
-masscan_results/
+antinet_results/
 └── scan_YYYYMMDD_HHMMSS/
     └── 192.168.1.0_24/
         ├── masscan.txt        # Raw Masscan output

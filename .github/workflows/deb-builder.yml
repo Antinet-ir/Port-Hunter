@@ -12,73 +12,66 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout current repository
         uses: actions/checkout@v4
 
-      - name: Set up dependencies
+      - name: Install packaging tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y devscripts build-essential lintian debhelper-compat
+          sudo apt-get install -y devscripts build-essential lintian debhelper
 
-      - name: Create debian folder and control files
+      - name: Download latest GitHub release of AntiNet
         run: |
-          mkdir -p debian
+          LATEST_URL=$(curl -s https://api.github.com/repos/hosseinMsh/AntiNet/releases/latest | grep "browser_download_url" | grep ".deb" | cut -d '"' -f 4)
+          if [ -n "$LATEST_URL" ]; then
+            echo "[*] Downloading latest release: $LATEST_URL"
+            wget "$LATEST_URL" -O previous_antinet.deb
+            mkdir -p extracted_prev
+            dpkg-deb -x previous_antinet.deb extracted_prev
+          else
+            echo "[*] No previous .deb found. Skipping."
+          fi
 
-          cat <<EOF > debian/control
-          Source: antinet
+      - name: Prepare new version source structure
+        run: |
+          mkdir -p antinet/usr/bin
+          cp antinet.sh antinet/usr/bin/antinet
+          chmod +x antinet/usr/bin/antinet
+
+          mkdir -p antinet/DEBIAN
+          cat <<EOF > antinet/DEBIAN/control
+          Package: antinet
+          Version: 1.0.1
           Section: utils
           Priority: optional
-          Maintainer: Hossein Masihi <hossein.masihi@gmail.com>
-          Build-Depends: debhelper-compat (= 13)
-          Standards-Version: 4.1.3
-          Homepage: https://github.com/hosseinMsh/AntiNet
-
-          Package: antinet
           Architecture: all
-          Depends: bash, nmap, masscan 
+          Maintainer: Hossein Masihi <hossein.masihi@gmail.com>
+          Depends: bash, nmap, masscan
           Description: AntiNet - Bash script for network scanning and reconnaissance
-           AntiNet is a robust Bash script that simplifies network scanning and reconnaissance.
-           It automatically detects your network settings, performs mass scans on specified
-           CIDR ranges, and conducts detailed Nmap scans on live IPs, organizing results
-           for easy access.
+           AntiNet automates scanning with masscan and nmap across CIDRs and organizes output.
           EOF
 
-          echo "antinet.sh usr/bin/antinet" > debian/install
+          echo "[*] Optional: Add new file to release"
+          echo "This is a README add-on for v1.0.1" > antinet/usr/bin/README_added.txt
 
-          cat <<EOF > debian/rules
-          #!/usr/bin/make -f
-          %:
-          	dh \$@
-          EOF
-          chmod +x debian/rules
-
-          cat <<EOF > debian/changelog
-          antinet (1.0.0) unstable; urgency=medium
-
-            * Initial release.
-
-           -- Hossein Masihi <hossein.masihi@gmail.com>  $(date -R)
-          EOF
-
-      - name: Build the .deb package
+      - name: Build the .deb package manually
         run: |
-          chmod +x antinet.sh
-          dpkg-buildpackage -us -uc
+          dpkg-deb --build antinet
 
-      - name: Move .deb to current directory
+      - name: Rename and move .deb
         run: |
-          mv ../antinet_*.deb .
+          mv antinet.deb antinet_1.0.1_all.deb
 
-      - name: Upload .deb as artifact
+      - name: Upload .deb as GitHub Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: antinet-deb-package
-          path: antinet_*.deb
+          name: antinet-1.0.1-deb
+          path: antinet_1.0.1_all.deb
 
       - name: Upload .deb to GitHub Release
         if: github.event_name == 'release'
         uses: softprops/action-gh-release@v1
         with:
-          files: antinet_*.deb
+          files: antinet_1.0.1_all.deb
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

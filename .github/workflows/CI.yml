@@ -57,7 +57,9 @@ jobs:
 
     steps:
       - name: Download artifact
-        uses: actions/download-pages-artifact@v4
+        uses: actions/download-pages-artifact@v3
+        with:
+          path: ./dist  # Specify the correct path to download
 
       - name: Deploy to GitHub Pages
         id: deployment

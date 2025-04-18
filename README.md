@@ -140,8 +140,3 @@ Pull requests and suggestions are welcome! If you have ideas or improvements, fe
 ## 📝 License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
-```
-
----
-
-Let me know if you want badge icons, a GIF demo section, or GitHub-friendly formatting with TOC and links!

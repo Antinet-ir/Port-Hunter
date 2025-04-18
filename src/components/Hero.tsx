@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Terminal, Network, Shield, Eye } from 'lucide-react';
 
 const terminalLines = [
@@ -71,7 +71,7 @@ const Hero: React.FC = () => {
               </a>
             </div>
           </div>
-          
+
           <div className="md:w-1/2 relative">
             <div className="w-full h-80 sm:h-96 bg-gray-800 rounded-lg shadow-xl overflow-hidden">
               <div className="flex items-center bg-gray-900 px-4 py-2">

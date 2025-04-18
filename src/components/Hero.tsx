@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Terminal, Network, Shield, Eye } from 'lucide-react';
 
 const terminalLines = [
@@ -18,6 +18,7 @@ const terminalLines = [
 
 const Hero: React.FC = () => {
   const [displayedLines, setDisplayedLines] = useState<string[]>([]);
+  const terminalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let index = 0;
@@ -27,10 +28,17 @@ const Hero: React.FC = () => {
         return next.length > 20 ? next.slice(-20) : next;
       });
       index++;
-    }, 1200);
+    }, 500); // 🔥 سرعت بیشتر
 
     return () => clearInterval(interval);
   }, []);
+
+  // 👇 اسکرول خودکار به آخر ترمینال
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [displayedLines]);
 
   return (
     <section className="pt-32 pb-20 relative overflow-hidden">
@@ -82,7 +90,10 @@ const Hero: React.FC = () => {
                 </div>
                 <div className="ml-4 text-gray-400 text-sm">Terminal</div>
               </div>
-              <div className="p-4 font-mono text-sm text-green-400 overflow-y-auto h-full">
+              <div
+                className="p-4 font-mono text-sm text-green-400 overflow-y-auto h-full"
+                ref={terminalRef}
+              >
                 {displayedLines.map((line, idx) => (
                   <p key={idx} className="whitespace-pre-wrap">{line}</p>
                 ))}

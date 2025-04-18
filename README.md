@@ -1,8 +1,3 @@
-Great! Here's your updated `README.md` with the new **CSV/JSON export features**, enhanced formatting, and slight wording improvements for clarity:
-
----
-
-```markdown
 # AntiNet
 
 **AntiNet** is a robust Bash script that simplifies network scanning and reconnaissance. It automatically detects your network settings, performs mass scans on specified CIDR ranges using `masscan`, and conducts detailed `nmap` scans on live IPs — all while organizing the results for easy access and exporting structured data formats.

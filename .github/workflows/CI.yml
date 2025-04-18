@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x]  # Only one version needed for deployment
+        node-version: [18.x]
 
     steps:
       - uses: actions/checkout@v4
@@ -44,10 +44,9 @@ jobs:
         run: tsc --noEmit
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: dist  # Upload the 'dist' folder (or your build folder)
-          path: ./dist  # Adjust this to your actual build folder
+          path: ./dist
 
   deploy:
     needs: build
@@ -58,10 +57,7 @@ jobs:
 
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: dist  # Use the same name as in the upload step
-          path: ./dist  # Where the artifact will be downloaded to
+        uses: actions/download-artifact@v4
 
       - name: Deploy to GitHub Pages
         id: deployment

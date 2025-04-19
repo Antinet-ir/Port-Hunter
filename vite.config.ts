@@ -8,4 +8,9 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    rollupOptions: {
+      external: ['framer-motion'], // If you want to exclude framer-motion from the bundle
+    },
+  },
 });

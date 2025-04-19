@@ -1,5 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Terminal, Network, Shield, Eye } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const generateRandomIP = () => {
+  const randomNum = () => Math.floor(Math.random() * 255) + 1;
+  return `${randomNum()}.${randomNum()}.${randomNum()}.${randomNum()}`;
+};
 
 const terminalLines = [
   '$ ./antiNet.sh 192.168.1.0/24',
@@ -12,7 +18,10 @@ const terminalLines = [
   '[+] Starting nmap scan for 192.168.1.1',
   '[+] Port 80 (http): Apache httpd 2.4.29',
   '[+] Port 22 (ssh): OpenSSH 7.6p1',
-  '[+] Scan complete! Results saved to antinet_results/scan_20250418_145300/'
+  '[+] Scan complete! Results saved to antinet_results/scan_20250418_145300/',
+  `[+] Found live host: ${generateRandomIP()}`,
+  `[+] Found live host: ${generateRandomIP()}`,
+  `[+] Found live host: ${generateRandomIP()}`,
 ];
 
 const Hero: React.FC = () => {
@@ -39,6 +48,14 @@ const Hero: React.FC = () => {
 
     return () => clearInterval(soundInterval);
   }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDisplayedLines((prev) => prev.slice(0, prev.length - 3)); // حذف ۳ خط آخر (که IP‌ها هستند)
+    }, 5000); // بعد از ۵ ثانیه حذف می‌شوند
+
+    return () => clearTimeout(timeout);
+  }, [displayedLines]);
 
   return (
     <section className="pt-32 pb-20 relative overflow-hidden">
@@ -90,9 +107,19 @@ const Hero: React.FC = () => {
                 <div className="ml-4 text-green-400 text-sm">root@antinet:~#</div>
               </div>
               <div ref={terminalRef} className="p-4 font-mono text-sm text-green-400 overflow-y-auto h-full whitespace-pre-wrap">
-                {displayedLines.map((line, i) => (
-                  <p key={i}>{line}</p>
-                ))}
+                <AnimatePresence>
+                  {displayedLines.map((line, i) => (
+                    <motion.p
+                      key={i}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      {line}
+                    </motion.p>
+                  ))}
+                </AnimatePresence>
               </div>
             </div>
           </div>
@@ -129,4 +156,3 @@ const Hero: React.FC = () => {
 };
 
 export default Hero;
-

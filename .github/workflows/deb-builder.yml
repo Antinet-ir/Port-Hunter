@@ -22,7 +22,7 @@ jobs:
 
       - name: Download latest GitHub release of AntiNet
         run: |
-          LATEST_URL=$(curl -s https://api.github.com/repos/hosseinMsh/AntiNet/releases/latest | grep "browser_download_url" | grep ".deb" | cut -d '"' -f 4)
+          LATEST_URL=$(curl -s https://api.github.com/repos/Antinet-ir/Port-Hunter/releases/latest | grep "browser_download_url" | grep ".deb" | cut -d '"' -f 4)
           if [ -n "$LATEST_URL" ]; then
             echo "[*] Downloading latest release: $LATEST_URL"
             wget "$LATEST_URL" -O previous_antinet.deb
